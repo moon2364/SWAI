@@ -59,22 +59,6 @@ https://templatemo.com/tm-562-space-dynamic
               <h4>INTERV<span>MATE</span></h4>
             </a>
             <!-- ***** Logo End ***** -->
-            <!-- ***** Menu Start ***** -->
-            <ul class="nav">
-              <li class="scroll-to-section"><a href="#top" class="active">Home</a></li>
-              <li class="scroll-to-section"><a href="#about">Services</a></li>
-              <!-- <li class="scroll-to-section"><a href="#services">Services</a></li> -->
-              <li class="scroll-to-section"><a href="#portfolio">Expected</a></li>
-              <!-- <li class="scroll-to-section"><a href="#blog">Blog</a></li> -->
-              <li class="scroll-to-section"><a href="#contact">Message Us</a></li>
-              <li class="scroll-to-section">
-                <div class="main-red-button"><a href="#contact">Contact Now</a></div>
-              </li>
-            </ul>
-            <a class='menu-trigger'>
-              <span>Menu</span>
-            </a>
-            <!-- ***** Menu End ***** -->
           </nav>
         </div>
       </div>
@@ -325,7 +309,7 @@ https://templatemo.com/tm-562-space-dynamic
   </div>
   <!-- ***** Demo Section Start ***** -->
   <div id="demo" class="section" style="padding: 80px 0; background-color: #f8f9fa;">
-    <div class="container">
+    <div class="container" style="max-width: 600px;">
       <div class="row">
         <div class="col-lg-12">
           <div class="section-heading wow bounceIn" data-wow-duration="1s" data-wow-delay="0.2s">
@@ -334,6 +318,16 @@ https://templatemo.com/tm-562-space-dynamic
           </div>
         </div>
       </div>
+      <div class="candidate-info-box" style="margin: 15px auto; max-width : 600px;text-align:left;">
+        <label for="candidateRole"><strong>지원 직무</strong></label>
+        <input id="candidateRole" type="text" class="form-control" placeholder="예: 백엔드 개발자 / 데이터 분석가"
+          style="max-width: 600px;">
+
+        <label for="candidateIntro" style="margin-top:10px;"><strong>본인 소개 / 주요 경험</strong></label>
+        <textarea id="candidateIntro" class="form-control" placeholder="간단한 자기소개, 주요 프로젝트/경험, 강점 등을 적어주세요." rows="3"
+          style="max-width: 600px;"></textarea>
+      </div>
+      <br>
       <div class="row justify-content-center">
         <div class="col-lg-10">
           <!-- Persona Selection -->
@@ -456,7 +450,7 @@ https://templatemo.com/tm-562-space-dynamic
 
   </script>
   <script>
-    addrScript = 'https://script.google.com/macros/s/AKfycbwU5J1qRVNcAroGIOhSCS2tMMsGYsToMD9Bx3PZ-WaHw9U9xDaSln9CdkYBfXBS2I2J/exec';
+    addrScript = 'https://script.google.com/macros/s/AKfycbxP3U4AzE0MWxdkamXylX79IP2V1x_0aUA8eIjRorV04-u_WueVuwDUYIcuxXml-8_u/exec';
     const CHAT_API_URL = addrScript;
     // 마이크 테스트: 음성 인식 결과를 콘솔과 화면에 표시
     function micTest() {
@@ -798,6 +792,26 @@ https://templatemo.com/tm-562-space-dynamic
     let recognition;
     let isInterviewing = false;
     let chatHistory = [];
+    let candidateInfo = "";   // 🔥 지원자 정보 저장용
+
+    function updateCandidateInfoFromForm() {
+      // input/textarea가 없을 때 에러 안 나게 ? 써줌
+      const roleEl = document.getElementById('candidateRole');
+      const introEl = document.getElementById('candidateIntro');
+
+      const role = roleEl ? roleEl.value.trim() : "";
+      const intro = introEl ? introEl.value.trim() : "";
+
+      let info = "";
+      if (role) {
+        info += `지원 직무: ${role}\n`;
+      }
+      if (intro) {
+        info += `자기소개/주요 경험: ${intro}`;
+      }
+
+      candidateInfo = info;   // 전역 변수에 최신 상태 저장
+    }
 
     // Persona Selection
     function setPersona(persona, btn) {
@@ -910,6 +924,7 @@ https://templatemo.com/tm-562-space-dynamic
     async function sendToAI(userText) {
       // Stop listening while AI thinks/speaks
       // recognition.stop(); // Already stopped by continuous=false
+      updateCandidateInfoFromForm();
 
       try {
         setAIStatus('thinking');
@@ -918,7 +933,8 @@ https://templatemo.com/tm-562-space-dynamic
           JSON.stringify({
             user_message: userText,
             persona: currentPersona,
-            history: chatHistory
+            history: chatHistory,
+            candidate_info: candidateInfo
           }),
           {
             headers: {
@@ -1010,6 +1026,9 @@ https://templatemo.com/tm-562-space-dynamic
       }
     });
     async function sendTextChat() {
+
+      updateCandidateInfoFromForm();
+
       const input = document.getElementById('textInput');
       const userText = input.value.trim();
       if (userText === "") return;
@@ -1023,7 +1042,8 @@ https://templatemo.com/tm-562-space-dynamic
           JSON.stringify({
             user_message: userText,
             persona: currentPersona,
-            history: chatHistory
+            history: chatHistory,
+            candidate_info: candidateInfo
           }),
           {
             headers: {
@@ -1031,7 +1051,7 @@ https://templatemo.com/tm-562-space-dynamic
             }
           }
         );
-
+        // console.log("Candidate Info:", candidateInfo);
         console.log("AI Response:", response.data);
 
         const aiText = response.data.ai_message;
