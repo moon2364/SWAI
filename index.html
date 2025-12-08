@@ -373,7 +373,11 @@ https://templatemo.com/tm-562-space-dynamic
             </div>
             <div class="ai-status text-center mb-3">
               <span id="aiStatusDot"></span>
-              <span id="aiStatusText">대기 중</span>
+              <span id="aiStatusText">대기 중</span><br>
+              <button class="btn btn-outline-secondary mt-2" onclick="commitVoiceAnswer()">
+                답변 전송
+              </button>
+
             </div>
           </div>
 
@@ -402,8 +406,9 @@ https://templatemo.com/tm-562-space-dynamic
     </div>
   </div>
   <script>
-
     // 실시간 피드백
+    let pendingSpeech = "";   // 음성으로 쌓이는 임시 답변
+
     let brightnessTimer = null;
     let videoCanvas = null;
     let videoCtx = null;
@@ -824,46 +829,46 @@ https://templatemo.com/tm-562-space-dynamic
     }
 
     // Initialize Speech Recognition
-    if ('webkitSpeechRecognition' in window) {
-      recognition = new webkitSpeechRecognition();
-      recognition.continuous = false; // We want to process sentence by sentence
-      recognition.lang = 'ko-KR'; // Korean
-      recognition.interimResults = false;
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;      // 🔥 끊기지 않게 계속 듣기
+    recognition.lang = 'ko-KR';
+    recognition.interimResults = true;  // 중간 결과도 받기
 
-      recognition.onstart = function () {
-        speechStartTime = Date.now();
-        setAIStatus('listening');
-      };
+    recognition.onresult = function (event) {
+      let finalChunk = "";
+      let interimChunk = "";
 
-      recognition.onend = function () {
-        if (isInterviewing) {
-          // Restart if we are still interviewing, but give a small delay
-          // or wait for AI to finish speaking?
-          // Ideally, we wait for AI to finish speaking before listening again.
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalChunk += t;
         } else {
-          document.getElementById('statusText').innerText = "Interview stopped.";
-          document.getElementById('statusText').style.color = "grey";
+          interimChunk += t;
         }
-      };
+      }
 
-      recognition.onresult = function (event) {
-        const transcript = event.results[0][0].transcript;
-        console.log('User said:', transcript);
-        addToChatLog('You', transcript);
+      // 최종 인식된 문장은 버퍼에 쌓아두기
+      if (finalChunk) {
+        pendingSpeech += " " + finalChunk;
+        pendingSpeech = pendingSpeech.trim();
+      }
 
+      // 원하면 interimChunk를 화면 어딘가에 “실시간 자막”처럼 보여줄 수도 있음
+      // 예: 상태창 / 별도 div에 pendingSpeech + interimChunk 출력
+    };
+    function commitVoiceAnswer() {
+      const text = pendingSpeech.trim();
+      if (!text) {
+        addToChatLog('System', '🎙 아직 음성으로 인식된 답변이 없습니다.');
+        return;
+      }
 
+      addToChatLog('You', text);
+      analyzeSpeechSpeed(text);   // 속도 분석 유지하고 싶으면
+      sendToAI(text);
 
-        // ✅ 말 속도 분석
-        analyzeSpeechSpeed(transcript);
-
-
-        // Send to Backend
-        sendToAI(transcript);
-      };
-    } else {
-      alert("Web Speech API is not supported in this browser. Please use Chrome.");
+      pendingSpeech = "";  // 버퍼 비우기
     }
-
     async function startInterview() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
