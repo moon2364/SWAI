@@ -30,7 +30,7 @@
 ### 1. 프로젝트 클론 (Clone)
 터미널(Git Bash, PowerShell, CMD 등)을 열고 아래 명령어를 입력하여 프로젝트를 내려받습니다.
 ```bash
-git clone <레포지토리 주소>
+git clone [<레포지토리 주소>](https://github.com/moon2364/SWAI)
 cd SWAI
 ```
 
