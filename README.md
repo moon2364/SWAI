@@ -77,23 +77,29 @@ cd SWAI
     ```
     *   파일을 저장합니다.
 
-2.  **로컬 서버 실행**
-    브라우저의 보안 정책(CORS, 카메라/마이크 권한 등)으로 인해 `index.html` 파일을 더블 클릭해서 열면 작동하지 않습니다. 반드시 **로컬 웹 서버**를 통해 실행해주세요.
+### 2. 로컬 실행 (Run)
 
-    **방법 A: VS Code Live Server 확장 프로그램 사용 (권장)**
-    1.  Visual Studio Code에서 확장 프로그램 마켓플레이스(Ctrl+Shift+X)로 이동해 `Live Server`를 설치합니다.
-    2.  `index.html` 파일에서 마우스 우클릭 후 `Open with Live Server`를 선택합니다.
+브라우저 정책에 따라 두 가지 방법 중 하나를 선택하여 실행할 수 있습니다.
 
-    **방법 B: Python 사용**
-    Python이 설치되어 있다면 터미널에서 아래 명령어를 실행합니다.
+**방법 A: 직접 실행 (간편)**
+가장 간단한 방법입니다. `index.html` 파일을 더블 클릭하여 브라우저에서 바로 엽니다.
+*   대부분의 환경에서 정상 작동하지만, 일부 브라우저에서는 보안 정책(CORS, 카메라 권한)으로 인해 기능이 제한될 수 있습니다.
+*   만약 작동하지 않는다면 **방법 B**를 시도해주세요.
+
+**방법 B: 로컬 웹 서버 실행 (권장)**
+가장 안정적인 실행 방법입니다.
+
+1.  **VS Code Live Server (추천)**
+    *   VS Code 확장 프로그램 `Live Server` 설치 후, `index.html` 우클릭 -> `Open with Live Server` 선택
+
+2.  **Python 사용**
     ```bash
     # Python 3.x
     python -m http.server 8000
     ```
-    실행 후 브라우저 주소창에 `http://localhost:8000`을 입력하여 접속합니다.
+    브라우저에서 `http://localhost:8000` 접속
 
-    **방법 C: Node.js (npx) 사용**
-    Node.js가 설치되어 있다면 아래 명령어를 실행합니다.
+3.  **Node.js (npx) 사용**
     ```bash
     npx serve .
     ```
