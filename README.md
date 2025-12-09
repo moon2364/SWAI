@@ -120,4 +120,4 @@ SWAI/
 
 ## ⚠️ 주의사항
 - **API Key 보안**: `appscript.js` 파일이나 `index.html` 파일에 OpenAI API Key를 직접 하드코딩하지 마세요. 반드시 Google Apps Script의 **스크립트 속성** 기능을 사용해야 안전합니다.
-- **브라우저 호환성**: 최신 Chrome, Edge, Safari 브라우저 사용을 권장합니다. (Internet Explorer는 지원하지 않습니다.)
+- **브라우저 호환성**: 최신 Chrome 브라우저 사용을 권장합니다.
