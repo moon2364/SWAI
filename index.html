@@ -354,7 +354,7 @@ https://templatemo.com/tm-562-space-dynamic
           <div class="video-area d-flex justify-content-between mb-4" style="gap: 20px; flex-wrap: wrap;">
             <div class="video-box" style="flex: 1; min-width: 300px; position: relative;">
               <video id="userVideo" autoplay playsinline muted
-                style="width: 100%; border-radius: 15px; border: 2px solid #ddd; background: #000;"></video>
+                style="width: 100%; border-radius: 15px; border: 2px solid #ddd; background: #000; transform: scaleX(-1);"></video>
               <!-- ✅ 실시간 피드백 오버레이 -->
               <div id="liveFeedback" style="position:absolute; top:10px; left:10px; 
               background:rgba(0,0,0,0.6); color:#fff;
@@ -456,7 +456,7 @@ https://templatemo.com/tm-562-space-dynamic
 
   </script>
   <script>
-    addrScript = 'https://script.google.com/macros/s/AKfycbyKGIsNuGdTbFJLK09R9HaRiQmWaUHY1AOolxPSap4hcPSuu6QDz-ImIZy4-Dng26wQ/exec';
+    addrScript = 'https://script.google.com/macros/s/AKfycbw8XVAimgHy3roV2fMhgXVBdZ8NhHCU9XgiJrzl02lvq4iwlrkYtFCCBf6Ht_AL2DdU/exec';
     const CHAT_API_URL = addrScript;
     // 마이크 테스트: 음성 인식 결과를 콘솔과 화면에 표시
     function micTest() {
@@ -507,9 +507,9 @@ https://templatemo.com/tm-562-space-dynamic
         // 경험치로 대충 나눔 (필요하면 나중에 조정)
         if (cps > 6) {
           feedback = '말 속도가 많이 빠른 편입니다. 천천히 말해보세요.';
-        } else if (cps > 4.5) {
+        } else if (cps > 4) {
           feedback = '조금 빠른 편입니다.';
-        } else if (cps < 2.5) {
+        } else if (cps < 2) {
           feedback = '말 속도가 다소 느립니다. 약간 빠르게 말해보세요.';
         } else {
           feedback = '말 속도는 적당한 편입니다.';
@@ -849,12 +849,13 @@ https://templatemo.com/tm-562-space-dynamic
 
       // 최종 인식된 문장은 버퍼에 쌓아두기
       if (finalChunk) {
+        if (!pendingSpeech) {
+          speechStartTime = Date.now();
+        }
         pendingSpeech += " " + finalChunk;
         pendingSpeech = pendingSpeech.trim();
       }
 
-      // 원하면 interimChunk를 화면 어딘가에 “실시간 자막”처럼 보여줄 수도 있음
-      // 예: 상태창 / 별도 div에 pendingSpeech + interimChunk 출력
     };
     function commitVoiceAnswer() {
       const text = pendingSpeech.trim();
@@ -867,7 +868,8 @@ https://templatemo.com/tm-562-space-dynamic
       analyzeSpeechSpeed(text);   // 속도 분석 유지하고 싶으면
       sendToAI(text);
 
-      pendingSpeech = "";  // 버퍼 비우기
+      pendingSpeech = "";         // 다음 답변을 위해 버퍼 비우기
+      speechStartTime = null;     // 🔥 한 답변에 대한 측정 끝
     }
     async function startInterview() {
       try {
@@ -939,7 +941,7 @@ https://templatemo.com/tm-562-space-dynamic
           }),
           {
             headers: {
-              'Content-Type': 'text/plain'   // ✅ preflight 피하려고 text/plain 사용
+              'Content-Type': 'text/plain'
             }
           }
         );
@@ -966,45 +968,7 @@ https://templatemo.com/tm-562-space-dynamic
       }
     }
 
-    // function speak(text) {
-    //   const utterance = new SpeechSynthesisUtterance(text);
-    //   utterance.lang = 'ko-KR';
-    //   utterance.voice = speechSynthesis.getVoices().find(v => v.lang === 'ko-KR'); //한국어에 어울리는 tts를 선택
 
-    //   // Adjust voice based on persona (simple pitch/rate adjustment)
-    //   if (currentPersona === 'strict') {
-    //     utterance.pitch = 0.8;
-    //     utterance.rate = 1.1;
-    //   } else if (currentPersona === 'friendly') {
-    //     utterance.pitch = 1.2;
-    //     utterance.rate = 1.0;
-    //   } else {
-    //     utterance.pitch = 1.0;
-    //     utterance.rate = 1.0;
-    //   }
-
-    //   utterance.onstart = function () {
-    //     document.getElementById('aiSpeakingIndicator').style.display = 'block';
-    //     document.getElementById('statusText').innerText = "AI Speaking...";
-    //     setAIStatus('speaking');
-    //   };
-
-    //   utterance.onend = function () {
-    //     document.getElementById('aiSpeakingIndicator').style.display = 'none';
-    //     // Resume listening after AI finishes
-    //     if (isInterviewing) {
-    //       setAIStatus('listening');
-    //       try {
-    //         recognition.start();
-    //       } catch (e) {
-    //         setAIStatus('idle');
-    //         console.log("Recognition already started or error", e);
-    //       }
-    //     }
-    //   };
-
-    //   window.speechSynthesis.speak(utterance);
-    // }
     async function speak(text) {
       try {
         // 상태 표시 (원하면)
@@ -1027,8 +991,7 @@ https://templatemo.com/tm-562-space-dynamic
         const data = res.data;
         if (!data.audio_b64) {
           console.error("No audio_b64 in response:", data);
-          // 실패하면 기존 브라우저 TTS로 fallback 할 수도 있음
-          // fallbackSpeechSynthesis(text);
+
           setAIStatus('idle');
           document.getElementById('aiSpeakingIndicator').style.display = 'none';
           return;
@@ -1108,7 +1071,6 @@ https://templatemo.com/tm-562-space-dynamic
             }
           }
         );
-        // console.log("Candidate Info:", candidateInfo);
         console.log("AI Response:", response.data);
 
         const aiText = response.data.ai_message;
