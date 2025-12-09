@@ -63,7 +63,7 @@ cd SWAI
         *   **액세스 권한이 있는 사용자 (Who has access)**: `모든 사용자 (Anyone)` **(중요!)**
     *   **배포 (Deploy)** 버튼을 클릭합니다.
     *   (처음 배포 시) **액세스 승인 (Authorize access)** 창이 뜨면 권한을 허용해줍니다.
-    *   배포가 완료되면 **웹 앱 URL (Web app URL)** 을 복사합니다. ( `https://script.google.com/...` 형식)
+    *   배포가 완료되면 **웹 앱 URL (Web app URL)** 을 복사합니다. ( `https://script.google.com/...exec` 형식)
 
 ### 3. Frontend 연결 및 실행
 
